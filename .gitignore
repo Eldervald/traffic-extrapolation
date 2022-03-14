@@ -131,6 +131,6 @@ dmypy.json
 /.idea
 /.vscode
 
-/data
-/model_data
-/datasets
+*/data
+*/models_data
+*/datasets

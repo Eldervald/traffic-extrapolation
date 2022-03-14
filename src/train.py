@@ -1,20 +1,14 @@
 import copy
 from typing import Tuple, Union, List
-import pandas as pd
 import numpy as np
-import networkx as nx
-from tqdm.notebook import tqdm as tqdm
+from tqdm import tqdm as tqdm
 from sklearn.metrics import r2_score
 
 # import node2vec
 
 import torch
 
-import torch_geometric as pyg
-from torch_geometric.utils.convert import from_networkx
-
-from utils import *
-from dataset import *
+from .utils import *
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -23,15 +17,11 @@ sns.set_style('darkgrid')
 from IPython.display import clear_output
 
 
-device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
-device
-
-
 def calc_score(pred, actual):
     return r2_score(actual, pred)
 
 
-def test(model, loader, loss_fn) -> Tuple[float, float]:
+def test(model, loader, loss_fn, device) -> Tuple[float, float]:
     # returns average loss and score
     model.eval()
 
@@ -40,9 +30,8 @@ def test(model, loader, loss_fn) -> Tuple[float, float]:
 
     with torch.no_grad():
         for (X, y) in loader:
-            X_gpu = X.to(device)
             y_gpu = y.to(device)
-            out = model(X_gpu)
+            out = model(X)
             scores.append(calc_score(out.detach().cpu(), y))
             loss = loss_fn(out, y_gpu)
             total_loss += loss.item()
@@ -50,7 +39,8 @@ def test(model, loader, loss_fn) -> Tuple[float, float]:
     return total_loss / len(loader), np.mean(scores)
 
 
-def train(model, train_loader, val_loader, loss_fn, optimizer, scheduler=None, num_epochs=10, plotting=True):
+def train(model, train_loader, val_loader, loss_fn,
+          optimizer, device, scheduler=None, num_epochs=10, plotting=True):
     train_losses = []
     val_losses = []
     val_scores = []
@@ -64,9 +54,8 @@ def train(model, train_loader, val_loader, loss_fn, optimizer, scheduler=None, n
 
         for i_step, (X, y) in enumerate(train_loader):
             optimizer.zero_grad()
-            X_gpu = X.to(device)
             y_gpu = y.to(device)
-            out = model(X_gpu)
+            out = model(X)
             loss = loss_fn(out, y_gpu)
             loss.backward()
             optimizer.step()
@@ -78,7 +67,7 @@ def train(model, train_loader, val_loader, loss_fn, optimizer, scheduler=None, n
         if scheduler is not None:
             scheduler.step()
 
-        val_loss, val_score = test(model, val_loader, loss_fn)
+        val_loss, val_score = test(model, val_loader, loss_fn, device)
         val_losses.append(val_loss)
         val_scores.append(val_score)
 
