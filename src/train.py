@@ -4,8 +4,6 @@ import numpy as np
 from tqdm import tqdm as tqdm
 from sklearn.metrics import r2_score
 
-# import node2vec
-
 import torch
 
 from .utils import *
@@ -17,30 +15,33 @@ sns.set_style('darkgrid')
 from IPython.display import clear_output
 
 
-def calc_score(pred, actual):
-    return r2_score(actual, pred)
-
-
 def test(model, loader, loss_fn, device) -> Tuple[float, float]:
-    # returns average loss and score
+    """ returns average loss and score
+    """
     model.eval()
 
-    scores = []
     total_loss = 0
+    y_true = []
+    y_pred = []
 
     with torch.no_grad():
         for (X, y) in loader:
             y_gpu = y.to(device)
             out = model(X)
-            scores.append(calc_score(out.detach().cpu(), y))
+
             loss = loss_fn(out, y_gpu)
             total_loss += loss.item()
+
+            y_true.extend(y)
+            y_pred.extend(out.detach().cpu())
     
-    return total_loss / len(loader), np.mean(scores)
+    return total_loss / len(loader), r2_score(y_true, y_pred)
 
 
 def train(model, train_loader, val_loader, loss_fn,
           optimizer, device, scheduler=None, num_epochs=10, plotting=True):
+    """ returns best model on validation
+    """
     train_losses = []
     val_losses = []
     val_scores = []
