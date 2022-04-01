@@ -7,7 +7,7 @@ import numpy as np
 class DayObservationsDataset(Dataset):
     def __init__(self, pickups_df: pd.DataFrame) -> None:
         super().__init__()
-        self.data = pickups_df['id'].to_numpy()
+        self.data = [str(x) for x in pickups_df['id'].values]
         self.targets = pickups_df['pickups'].to_numpy()
         self.observed_nodes = set(np.unique(self.data))
 
