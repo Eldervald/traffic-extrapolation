@@ -35,7 +35,7 @@ def test(model, loader, loss_fn, device) -> Tuple[float, float]:
             y_true.extend(y)
             y_pred.extend(out.detach().cpu())
     
-    return total_loss / len(loader), r2_score(y_true, y_pred)
+    return total_loss / (len(loader) * loader.batch_size), r2_score(y_true, y_pred)
 
 
 def train(model, train_loader, val_loader, loss_fn,
@@ -43,6 +43,7 @@ def train(model, train_loader, val_loader, loss_fn,
     """ returns best model on validation
     """
     train_losses = []
+    train_scores = []
     val_losses = []
     val_scores = []
     
@@ -55,7 +56,7 @@ def train(model, train_loader, val_loader, loss_fn,
 
         for i_step, (X, y) in enumerate(train_loader):
             optimizer.zero_grad()
-            y_gpu = y.to(device)
+            y_gpu = y.float().to(device)
             out = model(X)
             loss = loss_fn(out, y_gpu)
             loss.backward()
@@ -63,20 +64,22 @@ def train(model, train_loader, val_loader, loss_fn,
 
             total_loss += loss.item()
 
-        train_losses.append(total_loss / len(train_loader))
+        train_losses.append(total_loss / (len(train_loader) *  train_loader.batch_size))
 
         if scheduler is not None:
             scheduler.step()
 
+        _, train_score = test(model, train_loader, loss_fn, device)
         val_loss, val_score = test(model, val_loader, loss_fn, device)
         val_losses.append(val_loss)
         val_scores.append(val_score)
+        train_scores.append(train_score)
 
         if val_score > best_val_score:
             best_val_score = val_score
             best_model = copy.deepcopy(model)
 
-        if plotting and epoch > 0:
+        if plotting and epoch > 0 and epoch % 5 == 0:
             clear_output(True)
             _, axes = plt.subplots(1, 2, figsize=(20, 6))
             
@@ -87,6 +90,7 @@ def train(model, train_loader, val_loader, loss_fn,
             axes[0].legend()
 
             sns.lineplot(ax=axes[1], x=range(epoch + 1), y=val_scores, label='Val', color='red')
+            sns.lineplot(ax=axes[1], x=range(epoch + 1), y=train_scores, label='Train', color='blue')
             axes[1].set_xlabel('Epoch')
             axes[1].set_ylabel('Score')
             axes[1].legend()
