@@ -1,9 +1,9 @@
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
+from torch.utils.data.sampler import SubsetRandomSampler, RandomSampler
 
 
-def make_data_loaders_from_dataset(ds, batch_size=64):
+def make_dataloaders_from_dataset(ds, batch_size=64):
     indices = list(range(len(ds)))
 
     train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=17)
@@ -17,5 +17,13 @@ def make_data_loaders_from_dataset(ds, batch_size=64):
     train_loader = DataLoader(ds, batch_size=batch_size, sampler=train_sampler)
     val_loader = DataLoader(ds, batch_size=batch_size, sampler=val_sampler)
     test_loader = DataLoader(ds, batch_size=batch_size, sampler=test_sampler)
+
+    return train_loader, val_loader, test_loader
+
+
+def make_dataloaders_from_datasets(train_ds, val_ds, test_ds, batch_size=64):
+    train_loader = DataLoader(train_ds, batch_size=batch_size,  shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=batch_size,  shuffle=True)
+    test_loader = DataLoader(test_ds, batch_size=batch_size,  shuffle=True)
 
     return train_loader, val_loader, test_loader
