@@ -3,8 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-# Torch dataset. Used primary for batch training.
-class DayObservationsDataset(Dataset):
+class ObservationsDataset(Dataset):
     def __init__(self, df: pd.DataFrame) -> None:
         super().__init__()
         self.X = df['STATION'].to_numpy()
