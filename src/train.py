@@ -35,11 +35,11 @@ def test(model, loader, loss_fn, device) -> Tuple[float, float]:
             y_true.extend(y)
             y_pred.extend(out.detach().cpu())
     
-    return total_loss / (len(loader) * loader.batch_size), r2_score(y_true, y_pred)
+    return total_loss / len(loader), r2_score(y_true, y_pred)
 
 
 def train(model, train_loader, val_loader, loss_fn,
-          optimizer, device, scheduler=None, num_epochs=10, plotting=True):
+          optimizer, device, scheduler=None, num_epochs=10, plot=True, plot_update_every=5):
     """ returns best model on validation
     """
     train_losses = []
@@ -56,7 +56,7 @@ def train(model, train_loader, val_loader, loss_fn,
 
         for i_step, (X, y) in enumerate(train_loader):
             optimizer.zero_grad()
-            y_gpu = y.float().to(device)
+            y_gpu = y.to(device)
             out = model(X)
             loss = loss_fn(out, y_gpu)
             loss.backward()
@@ -64,7 +64,7 @@ def train(model, train_loader, val_loader, loss_fn,
 
             total_loss += loss.item()
 
-        train_losses.append(total_loss / (len(train_loader) *  train_loader.batch_size))
+        train_losses.append(total_loss / len(train_loader))
 
         if scheduler is not None:
             scheduler.step()
@@ -79,7 +79,7 @@ def train(model, train_loader, val_loader, loss_fn,
             best_val_score = val_score
             best_model = copy.deepcopy(model)
 
-        if plotting and epoch > 0 and epoch % 5 == 0:
+        if plot and epoch > 0 and epoch % plot_update_every == 0:
             clear_output(True)
             _, axes = plt.subplots(1, 2, figsize=(20, 6))
             
