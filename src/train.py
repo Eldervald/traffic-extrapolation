@@ -53,14 +53,20 @@ def train(model, train_loader, val_loader, loss_fn,
     for epoch in range(num_epochs + 1):
         model.train()
         total_loss = 0
+        y_true = []
+        y_pred = []
 
         for i_step, (X, y) in enumerate(train_loader):
             optimizer.zero_grad()
             y_gpu = y.to(device)
             out = model(X)
+
             loss = loss_fn(out, y_gpu)
             loss.backward()
             optimizer.step()
+
+            y_true.extend(y)
+            y_pred.extend(out.detach().cpu())
 
             total_loss += loss.item()
 
@@ -69,12 +75,11 @@ def train(model, train_loader, val_loader, loss_fn,
         if scheduler is not None:
             scheduler.step()
 
-        _, train_score = test(model, train_loader, loss_fn, device)
+        train_scores.append(r2_score(y_true, y_pred))
         val_loss, val_score = test(model, val_loader, loss_fn, device)
         val_losses.append(val_loss)
         val_scores.append(val_score)
-        train_scores.append(train_score)
-
+        
         if val_score > best_val_score:
             best_val_score = val_score
             best_model = copy.deepcopy(model)
@@ -97,5 +102,5 @@ def train(model, train_loader, val_loader, loss_fn,
 
             plt.show()
             # print(f'Epoch {epoch}, Loss: {train_losses[-1]:.4f}, Val loss: {val_loss:.4f}, Val R2: {val_scores[-1]:.4f}')
-        
+    
     return best_model

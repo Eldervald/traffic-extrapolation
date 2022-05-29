@@ -55,4 +55,4 @@ class KnnEstimator(BaseEstimator):
         if self.training:
             dists, indices = dists[:, 1:], indices[:, 1:]
 
-        return torch.as_tensor(dists), torch.as_tensor(indices)
+        return torch.as_tensor(dists).float(), torch.as_tensor(indices)
