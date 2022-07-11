@@ -6,8 +6,8 @@ from torch.utils.data.sampler import SubsetRandomSampler, RandomSampler
 def make_dataloaders_from_dataset(ds, batch_size=64):
     indices = list(range(len(ds)))
 
-    train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=17)
-    train_indices, val_indices = train_test_split(train_indices, test_size=0.5, random_state=17)
+    train_indices, test_indices = train_test_split(indices, test_size=0.3, random_state=17)
+    train_indices, val_indices = train_test_split(train_indices, test_size=0.3, random_state=17)
     # print(len(train_indices), len(val_indices), len(test_indices))
 
     train_sampler = SubsetRandomSampler(train_indices)

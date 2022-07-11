@@ -4,8 +4,9 @@ import numpy as np
 
 
 class ObservationsDataset(Dataset):
-    def __init__(self, df: pd.DataFrame) -> None:
+    def __init__(self, datetime, df: pd.DataFrame) -> None:
         super().__init__()
+        self.datetime = datetime
         self.X = df['STATION'].to_numpy()
         self.targets = df['ridership'].to_numpy()
         self.observed_nodes = set(np.unique(self.X))
@@ -27,4 +28,4 @@ class ObservationsDataset(Dataset):
     @classmethod
     def from_dataframe_by_day(cls, df, date):
         df = df[df['DATE'] == date].drop('DATE', axis=1)
-        return cls(df)
+        return cls(date, df)
