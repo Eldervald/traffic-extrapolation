@@ -1,8 +1,0 @@
-{
-    "LinearModel": 0.287,
-    "GNN_LSTM_Model": 0.285,
-    "LSTM_Model": 0.280,
-    "LinearWithDtModel": 0.285,
-    "LSTMWithDtModel": 0.262,
-    "LinearWithStats": 0.212
-}

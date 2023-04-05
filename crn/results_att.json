@@ -1,8 +1,9 @@
 {
-    "PriorPredictionModel": 0.3516373634338379,
-    "LinearModel": 0.3489234745502472,
-    "LSTMModel": 0.3454555869102478,
-    "VNNModel": 0.34281623363494873,
-    "VNNWithDtModel": 0.3188665807247162,
-    "VNN_WithDtEmbModel": 0.3160996437072754
+    "HistoricalAverageModel": 0.9599362678113095,
+    "LinearModel": 0.9569562738379673,
+    "LSTMModel": 0.9549113402097171,
+    "VNNModel": 0.9578147093455697,
+    "VNNWithDtModel": 0.9639902621604194,
+    "VNN_WithDtEmbModel": 0.9636070296381223,
+    "RecurrentGCN": 0.95828923026028
 }
